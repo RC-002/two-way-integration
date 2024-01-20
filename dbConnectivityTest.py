@@ -1,6 +1,6 @@
-from customers.service import customerService
+from customers.service import dbService
 
-service = customerService()
+service = dbService()
 
 # Create a new customer
 print(service.createCustomer(id="1", name="John Doe", email="john.doe@example.com"))
