@@ -56,11 +56,10 @@ class dbService():
 
     def deleteCustomer(self, customer_id):
         try:
-            if(self.deleteIDMapping(customer_id)):
-                customer = self.session.query(Customer).filter(Customer.ID == customer_id).first()
-                if customer:
-                    self.session.delete(customer)
-                    self.session.commit()
+            customer = self.session.query(Customer).filter(Customer.ID == customer_id).first()
+            if customer:
+                self.session.delete(customer)
+                self.session.commit()
                 return True
             return False
         except:
@@ -117,7 +116,7 @@ class dbService():
 
 
 class stripeService:
-    stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
+    stripe.api_key = "<>"
 
     def createCustomer(self, email, name):
         try:
