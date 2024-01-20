@@ -25,13 +25,14 @@ async def get_service():
     return service
 
 # Create Customer
-@app.post("/customers/", status_code=status.HTTP_201_CREATED)
+@app.post("/customers/", status_code=status.HTTP_201_CREATED, response_model=Customer)
 async def create_customer(name: str, email: str, service: dbService = Depends(get_service)):
     if not Helper.isValidEmail(email):
         raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email address")
     
-    if service.createCustomer(name, email):
-        return {"name": name, "email": email}
+    customer = service.createCustomer(name, email)
+    if customer is not None:
+        return customer
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create customer")
 
@@ -39,7 +40,7 @@ async def create_customer(name: str, email: str, service: dbService = Depends(ge
 @app.get("/customers/{customer_id}", response_model=Customer)
 async def read_customer(customer_id: str, service: dbService = Depends(get_service)):
     customer = service.getCustomer(customer_id)
-    if customer:
+    if customer is not None:
         return customer
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
 
@@ -47,15 +48,16 @@ async def read_customer(customer_id: str, service: dbService = Depends(get_servi
 @app.get("/customers/", response_model=list[Customer])
 async def read_customers(service: dbService = Depends(get_service)):
     customers = service.getAllCustomers()
-    if type(customers) == list:
+    if customers is not None:
         return customers
     return []
 
 # Update Customer
 @app.put("/customers/{customer_id}", response_model=Customer)
 async def update_customer(customer_id: str, new_name: str, new_email: str, service: dbService = Depends(get_service)):
-    if service.updateCustomer(customer_id, new_name, new_email):
-        return {"ID": customer_id, "name": new_name, "email": new_email}
+    customer = service.updateCustomer(customer_id, new_name, new_email)
+    if customer is not None:
+        return customer
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update customer")
 
 # Delete Customer
