@@ -9,6 +9,13 @@ class Customer(BaseModel):
     name: str
     email: str
 
+class Helper():
+    def isValidEmail(email):
+        email_pattern = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+        match = email_pattern.match(email)
+        return bool(match)
+    
+
 # App settings
 app = FastAPI()
 service = customerService()
@@ -19,7 +26,10 @@ async def get_service():
 
 # Create Customer
 @app.post("/customers/", response_model=Customer)
-async def create_customer(name: str, email: str, service: customerService = Depends(get_service)):    
+async def create_customer(name: str, email: str, service: customerService = Depends(get_service)):
+    if not Helper.isValidEmail(email):
+        raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email address")
+    
     if service.createCustomer(name, email):
         return {"name": name, "email": email}
     else:
