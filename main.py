@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from customers.service import customerService
+from customers.service import dbService
 from pydantic import BaseModel
 import re
 
@@ -18,7 +18,7 @@ class Helper():
 
 # App settings
 app = FastAPI()
-service = customerService()
+service = dbService()
 
 # Dependency to get the service instance
 async def get_service():
@@ -26,7 +26,7 @@ async def get_service():
 
 # Create Customer
 @app.post("/customers/", status_code=status.HTTP_201_CREATED)
-async def create_customer(name: str, email: str, service: customerService = Depends(get_service)):
+async def create_customer(name: str, email: str, service: dbService = Depends(get_service)):
     if not Helper.isValidEmail(email):
         raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email address")
     
@@ -37,7 +37,7 @@ async def create_customer(name: str, email: str, service: customerService = Depe
 
 # Get Customer
 @app.get("/customers/{customer_id}", response_model=Customer)
-async def read_customer(customer_id: str, service: customerService = Depends(get_service)):
+async def read_customer(customer_id: str, service: dbService = Depends(get_service)):
     customer = service.getCustomer(customer_id)
     if customer:
         return customer
@@ -45,20 +45,22 @@ async def read_customer(customer_id: str, service: customerService = Depends(get
 
 # Get All Customers
 @app.get("/customers/", response_model=list[Customer])
-async def read_customers(service: customerService = Depends(get_service)):
+async def read_customers(service: dbService = Depends(get_service)):
     customers = service.getAllCustomers()
-    return customers
+    if type(customers) == list:
+        return customers
+    return []
 
 # Update Customer
 @app.put("/customers/{customer_id}", response_model=Customer)
-async def update_customer(customer_id: str, new_name: str, new_email: str, service: customerService = Depends(get_service)):
+async def update_customer(customer_id: str, new_name: str, new_email: str, service: dbService = Depends(get_service)):
     if service.updateCustomer(customer_id, new_name, new_email):
         return {"ID": customer_id, "name": new_name, "email": new_email}
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update customer")
 
 # Delete Customer
 @app.delete("/customers/{customer_id}", status_code=status.HTTP_202_ACCEPTED)
-async def delete_customer(customer_id: str, service: customerService = Depends(get_service)):
+async def delete_customer(customer_id: str, service: dbService = Depends(get_service)):
     customer = service.deleteCustomer(customer_id)
     if customer:
         return {"detail" :"Customer deleted"}

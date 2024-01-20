@@ -12,7 +12,8 @@ class Helper():
         hex_uuid = format(random_uuid.int, 'x')[:size]
 
         return str(hex_uuid)
-class customerService():
+    
+class dbService():
     def __init__(self):
         self.engine, self.session = dbConnectivity.create_engine_and_session()
 
