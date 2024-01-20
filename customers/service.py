@@ -24,24 +24,23 @@ class dbService():
             new_customer = Customer(ID=id, name=name, email=email)
             self.session.add(new_customer)
             self.session.commit()
-            return True
-        except Exception as e:
-            print(f"Error: {e}")
+            return new_customer
+        except:
             self.session.rollback()
-            return False
+            return None
 
     def getCustomer(self, customer_id):
         try:
             return self.session.query(Customer).filter(Customer.ID == customer_id).first()
         except:
             self.session.rollback()
-            return False
+            return None
 
     def getAllCustomers(self):
         try:
             return self.session.query(Customer).all()
         except:
-            return False
+            return None
 
     def updateCustomer(self, customer_id, new_name, new_email):
         try:
@@ -50,10 +49,10 @@ class dbService():
                 customer.name = new_name
                 customer.email = new_email
                 self.session.commit()
-            return True
+            return customer
         except:
             self.session.rollback()
-            return False
+            return None
 
     def deleteCustomer(self, customer_id):
         try:
@@ -105,8 +104,9 @@ class dbService():
             mapping = self.session.query(ID_Mapping).filter(ID_Mapping.customer_id == customer_id).first()
             if mapping:
                 self.session.delete(mapping)
-                self.session.commit()
-            return True
+                self.session.commit()                
+                return True
+            return False
         except:
             self.session.rollback()
             return False
@@ -117,7 +117,7 @@ class dbService():
 
 
 class stripeService:
-    stripe.api_key = "<>"
+    stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
 
     def createCustomer(self, email, name):
         try:
