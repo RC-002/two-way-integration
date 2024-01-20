@@ -6,7 +6,7 @@ CREATE DATABASE zenskar;
 
 -- Create the "customer" table in the "zenskar" database
 CREATE TABLE customer (
-    ID character varying(255) PRIMARY KEY,
+    ID character varying(32) PRIMARY KEY,
     name character varying(255) NOT NULL,
     email character varying(255) UNIQUE NOT NULL
 );
