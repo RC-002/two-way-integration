@@ -5,7 +5,7 @@ import re
 
 
 class Customer(BaseModel):
-    id; str
+    ID: str
     name: str
     email: str
 
