@@ -1,90 +1,51 @@
-import stripe
+import random
+import string
 
-# Set your Stripe API key
-stripe.api_key = '<>'
+from customers.service import stripeService, dbService
 
-def create_stripe_customer(email, name=None):
-    try:
-        # Create a new customer
-        customer = stripe.Customer.create(
-            email=email,
-            name=name,
-        )
+service = stripeService()
+dbService = dbService()
 
-        # Print the newly created customer ID
-        print(f"Customer created with ID: {customer.id}")
+def generateRandomName():
+    name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
+    return name.capitalize()
 
-        return customer
-
-    except stripe.error.StripeError as e:
-        # Handle Stripe errors
-        print(f"Stripe Error: {e}")
-        return None
-
-def retrieve_stripe_customer(customer_id):
-    try:
-        # Retrieve a customer by ID
-        customer = stripe.Customer.retrieve(customer_id)
-
-        # Print customer details
-        print(f"Customer ID: {customer.id}, Email: {customer.email}, Name: {customer.name}")
-
-        return customer
-
-    except stripe.error.StripeError as e:
-        # Handle Stripe errors
-        print(f"Stripe Error: {e}")
-        return None
-
-def update_stripe_customer(customer_id, new_email=None, new_name=None):
-    try:
-        # Update a customer by ID
-        customer = stripe.Customer.modify(
-            customer_id,
-            email=new_email,
-            name=new_name,
-        )
-
-        # Print updated customer details
-        print(f"Customer updated - ID: {customer.id}, Email: {customer.email}, Name: {customer.name}")
-
-        return customer
-
-    except stripe.error.StripeError as e:
-        # Handle Stripe errors
-        print(f"Stripe Error: {e}")
-        return None
-
-def delete_stripe_customer(customer_id):
-    try:
-        # Delete a customer by ID
-        deleted_customer = stripe.Customer.delete(customer_id)
-
-        # Print the ID of the deleted customer
-        print(f"Customer deleted with ID: {deleted_customer.id}")
-
-        return deleted_customer
-
-    except stripe.error.StripeError as e:
-        # Handle Stripe errors
-        print(f"Stripe Error: {e}")
-        return None
+def generateRandomEmail():
+    email_domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'example.com', 'domain.com']
+    username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    domain = random.choice(email_domains)
+    email = username + '@' + domain
+    return email
 
 # Example usage
-email_to_create = "example2@example.com"
-customer_name = "John Doe"
+email_to_create = generateRandomEmail()
+customer_name = generateRandomName()
+
+# Create a new customer in DB
+customer_id = dbService.createCustomer(name=customer_name, email=email_to_create).ID
 
 # Create a new customer
-new_customer = create_stripe_customer(email_to_create, name=customer_name)
+new_customer = service.createCustomer(email_to_create, customer_name)
+print("New customer created")
 
 # Retrieve the created customer
-if new_customer:
-    retrieved_customer = retrieve_stripe_customer(new_customer.id)
+if new_customer is not None:
+    retrieved_customer = service.getCustomer(new_customer.ID)
+    print("New customer retrieved")
 
     # Update the retrieved customer
-    if retrieved_customer:
-        updated_customer = update_stripe_customer(retrieved_customer.id, new_email="updated@example.com", new_name="Updated Name")
+    if retrieved_customer is not None:
+        updated_customer = service.updateCustomer(retrieved_customer.ID, new_email=generateRandomEmail(), new_name=generateRandomName())
+        print("Customer updated")
 
         # Delete the updated customer
-        if updated_customer:
-            deleted_customer = delete_stripe_customer(updated_customer.id)
+        if updated_customer is not None:
+            deleted_customer = service.deleteCustomer(updated_customer.ID)        
+            print("Deleted customer")
+
+            # Delete the customer from DB
+            if deleted_customer is not False:
+                dbService.deleteCustomer(customer_id)
+            exit(0)
+
+print("Something went wrong :)")
