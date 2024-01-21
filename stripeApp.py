@@ -1,7 +1,8 @@
 import stripe
-
+from threading import Thread
 from flask import Flask, jsonify, request
 from customers.service import stripeService
+from KafkaConsumer import syncConsumer
 
 stripe.api_key = "<>"
 
@@ -10,6 +11,7 @@ endpoint_secret = "<>"
 
 app = Flask(__name__)
 service = stripeService()
+consumer = syncConsumer()
 
 # Class to help handle local db operations for stripe events
 class Helper:
@@ -59,3 +61,14 @@ def webhook():
         print('Unhandled event type:', event['type'])
 
     return jsonify(success=True)
+
+
+# Start Kafka listener in the background when the Flask app starts
+def start_background_worker():
+    with app.app_context():
+        consumer.sync()
+
+if __name__ == '__main__':
+    t = Thread(target=start_background_worker)
+    t.start()
+    app.run(port=5000)
