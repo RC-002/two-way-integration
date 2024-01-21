@@ -1,11 +1,13 @@
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, status, Depends, BackgroundTasks
 from db.service import dbService
 from pydantic import BaseModel
 from KafkaProducer import syncProducer
 from KafkaConsumer import syncConsumer
 import re
 from contextlib import asynccontextmanager
-
+from threading import Thread
+from KafkaConsumer import syncConsumer
+import uvicorn
 
 class Customer(BaseModel):
     ID: str
@@ -18,17 +20,14 @@ class Helper():
         match = email_pattern.match(email)
         return bool(match)
     
-
-# # Start Kafka listener in the background when the FastAPI app starts
-# async def lifespan(FastAPI):
-#     print("Horray!")
-#     syncConsumer()
-
 # App settings
 app = FastAPI()
 
 service = dbService()
 syncProducer = syncProducer()
+
+
+
 
 # Dependency to get the service instance
 async def get_service():
@@ -88,3 +87,10 @@ async def delete_customer(customer_id: str, service: dbService = Depends(get_ser
         syncProducer.writeToTopic("delete", ID = integrationID, name = None, email = None)
         return {"detail" :"Customer deleted"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+
+
+if __name__ == '__main__':
+    syncConsumer = syncConsumer()
+    t = Thread(target=syncConsumer.sync)
+    t.start()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
