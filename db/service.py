@@ -1,5 +1,5 @@
-from customers.model import Customer, ID_Mapping
-from customers.repository import dbConnectivity
+from db.model import Customer, ID_Mapping
+from db.repository import dbConnectivity
 import uuid
 
 class Helper():    

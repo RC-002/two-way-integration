@@ -1,5 +1,5 @@
 import stripe
-from customers.model import Customer
+from db.model import Customer
 
 class Helper():        
     def getStripeID(stripeCustomer):
@@ -8,7 +8,7 @@ class Helper():
 
 
 class stripeService:
-    stripe.api_key = "<>"
+    stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
 
     # Create a customer
     def createCustomer(self, email, name):

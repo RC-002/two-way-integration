@@ -1,4 +1,4 @@
-from customers.model import Base
+from db.model import Base
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine

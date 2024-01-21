@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from customers.service import dbService
+from db.service import dbService
 from pydantic import BaseModel
 from KafkaProducer import syncProducer
 import re

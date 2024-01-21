@@ -1,4 +1,4 @@
-from customers.service import dbService
+from db.service import dbService
 
 service = dbService()
 
