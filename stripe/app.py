@@ -4,10 +4,8 @@ from flask import Flask, jsonify, request
 from stripeService import stripeService
 from KafkaConsumer import syncConsumer
 
-stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
-
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = 'whsec_yniVCAQpNBhEmW6gJTwpeAMT84KECbzl'
+endpoint_secret = "<>"
 
 app = Flask(__name__)
 service = stripeService()

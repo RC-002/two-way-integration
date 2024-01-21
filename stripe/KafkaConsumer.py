@@ -23,7 +23,8 @@ class syncConsumer:
                 customer = data.value["Customer"]
                 name = customer["name"]
                 email = customer["email"]
-                stripeService().createCustomer(email, name)
+                stripeCustomer = stripeService().createCustomer(email, name)
+                print(stripeCustomer)
             
             elif(data.value["method"] == "update"):
                 print("Here")
@@ -39,3 +40,6 @@ class syncConsumer:
                 stripe_id = customer["ID"]
                 
                 stripeCustomer = stripeService().deleteCustomer(stripe_id)
+
+if __name__ == "__main__":
+    syncConsumer().sync()
