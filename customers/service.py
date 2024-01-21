@@ -118,6 +118,7 @@ class dbService():
 class stripeService:
     stripe.api_key = "<>"
 
+    # Created a customer locally, now create a customer in Stripe
     def createCustomer(self, email, name):
         try:
             customer = stripe.Customer.create(
@@ -125,18 +126,32 @@ class stripeService:
                 name=name,
             )
             stripeId = Helper.getStripeID(customer)
-            dbService().addCustomerMapping(customer.id, stripeId)
+            dbService().addCustomerMapping(email, stripeId)
             return Customer(ID=customer.id, name=customer.name, email=customer.email)
         except:
             return None
 
+    # Created a customer in Stripe, now create a customer locally
+    def createCustomerLocally(self, stripe_id, email, name):
+        try:
+            localCustomer = dbService().createCustomer(name, email)
+            if localCustomer is not None:
+                dbService().addCustomerMapping(email, stripe_id)
+                print("THis is done as well")
+                return localCustomer
+            return None            
+        except:
+            return None
+
+    # Get all customers from Stripe
     def getCustomer(self, customer_id):
         try:
             customer = stripe.Customer.retrieve(customer_id)
             return Customer(ID=customer.id, name=customer.name, email=customer.email)
         except stripe.error.StripeError as e:
             return None
-
+        
+    # Update customer locally, then update customer in Stripe
     def updateCustomer(self, customer_id, new_email=None, new_name=None):
         try:
             stripe.Customer.modify(
@@ -148,12 +163,37 @@ class stripeService:
         except:
             return None
 
+    # Update customer in Stripe, then update customer locally
+    def updateCustomerLocally(self, stripe_id, new_email=None, new_name=None):
+        try:
+            localID = dbService().findCustomerID(stripe_id)
+            if localID is not None:
+                localCustomer = dbService().updateCustomer(localID, new_name, new_email)
+                if localCustomer is not None:
+                    return localCustomer 
+            return None   
+        except:
+            return None
+
+    # Delete customer locally, then delete customer in Stripe 
     def deleteCustomer(self, stripe_id):
         try:
             customer_id = dbService().findCustomerID(stripe_id)
             stripe.Customer.delete(stripe_id)
             if(dbService().deleteIDMapping(customer_id)):
                 return True
+            return False
+        except:
+            return False
+    
+    # Delete customer in Stripe, then delete customer locally
+    def deleteCustomerLocally(self, stripe_id):
+        try:
+            customer_id = dbService().findCustomerID(stripe_id)
+            if customer_id is not None:
+                if dbService().deleteIDMapping(customer_id):
+                    if dbService().deleteCustomer(customer_id):
+                        return True
             return False
         except:
             return False
