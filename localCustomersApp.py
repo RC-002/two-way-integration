@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from customers.service import dbService
 from pydantic import BaseModel
+from KafkaProducer import syncProducer
 import re
 
 
@@ -19,10 +20,16 @@ class Helper():
 # App settings
 app = FastAPI()
 service = dbService()
+syncProducer = syncProducer()
 
 # Dependency to get the service instance
 async def get_service():
     return service
+
+# Dependency to get the producer instance
+async def get_producer():
+    return syncProducer
+
 
 # Create Customer
 @app.post("/customers/", status_code=status.HTTP_201_CREATED, response_model=Customer)
@@ -32,6 +39,7 @@ async def create_customer(name: str, email: str, service: dbService = Depends(ge
     
     customer = service.createCustomer(name, email)
     if customer is not None:
+        syncProducer.writeToTopic("update", customer.ID, customer.name, customer.email)
         return customer
     else:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create customer")
@@ -57,6 +65,7 @@ async def read_customers(service: dbService = Depends(get_service)):
 async def update_customer(customer_id: str, new_name: str, new_email: str, service: dbService = Depends(get_service)):
     customer = service.updateCustomer(customer_id, new_name, new_email)
     if customer is not None:
+        syncProducer.writeToTopic("delete", customer.ID, customer.name, customer.email)
         return customer
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update customer")
 
@@ -65,6 +74,7 @@ async def update_customer(customer_id: str, new_name: str, new_email: str, servi
 async def delete_customer(customer_id: str, service: dbService = Depends(get_service)):
     customer = service.deleteCustomer(customer_id)
     if customer:
+        syncProducer.writeToTopic("customer", ID = customer_id, name = None, email = None)
         return {"detail" :"Customer deleted"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
 
