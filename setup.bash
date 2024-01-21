@@ -13,7 +13,7 @@ sleep 10
 
 # fast api server
 cd source
-uvicorn server:app --port 8000 --reload
+python server.py
 
 # flask server
 cd ../stripe

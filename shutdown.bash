@@ -3,7 +3,16 @@
 # Stop servers
 
 # fast api server
-kill $(ps aux | grep '[u]vicorn server:app' | awk '{print $2}')
+PID=$(pgrep -f "python server.py")
+
+if [ -z "$PID" ]; then
+  # Flask server is not running
+  exit 0
+else
+  # Kill the Flask server process
+  kill $PID
+fi
+
 
 
 # flask server
