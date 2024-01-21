@@ -123,7 +123,6 @@ class dbService():
         if customer is None:        
             customer = self.createCustomer(name, email)
         mapping = self.addCustomerMapping(email, integrationID)
-        print("Mapping: ", mapping)
         return customer
 
     def updateCustomerFromEvent(self, integrationID, new_name=None, new_email=None):

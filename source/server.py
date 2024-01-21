@@ -73,7 +73,6 @@ async def update_customer(customer_id: str, new_name: str, new_email: str, servi
     customer = service.updateCustomer(customer_id, new_name, new_email)
     if customer is not None:
         integrationID = dbService().findStripeID(customer_id)
-        print(integrationID)
         syncProducer.writeToTopic("update", integrationID, customer.name, customer.email)
         return customer
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update customer")
