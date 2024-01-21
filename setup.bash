@@ -13,10 +13,10 @@ sleep 10
 
 # fast api server
 cd source
-python server.py
+nohup python server.py > output.log 2>&1 &
 
 # flask server
 cd ../stripe
-python app.py
+nohup python app.py > output.log 2>&1 &
 sleep 5
 PID=$(pgrep -f "python app.py")
