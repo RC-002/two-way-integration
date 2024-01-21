@@ -3,6 +3,8 @@ from threading import Thread
 from flask import Flask, jsonify, request
 from stripeService import stripeService
 from KafkaConsumer import syncConsumer
+from KafkaProducer import syncProducer
+from Helper import Helper
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
 endpoint_secret = "<>"
@@ -10,26 +12,9 @@ endpoint_secret = "<>"
 app = Flask(__name__)
 service = stripeService()
 consumer = syncConsumer()
+producer = syncProducer()
+helper = Helper()
 
-# Class to help handle local db operations for stripe events
-class Helper:
-    def updateCustomer(customer):
-        name = customer['name']
-        email = customer['email']
-        stripe_id = customer['id']      
-        return service.updateCustomer(stripe_id, name, email)
-    
-    def createCustomer(customer):
-        name = customer['name']
-        email = customer['email']
-        stripe_id = customer['id']  
-        return service.createCustomer(stripe_id, name, email)
-    
-    def deleteCustomer(customer):
-        stripe_id = customer['id']
-        return service.deleteCustomer(stripe_id)
-    
-        
 @app.route('/webhook', methods=['POST'])
 def webhook():
     event = None
@@ -45,18 +30,24 @@ def webhook():
     except stripe.error.SignatureVerificationError as e:
         return jsonify(success=False), 500
     
-    print(event)
-    # # Handle the event
-    # if event['type'] == 'customer.created':
-    #     print("New Customer Created")
-    #     print(Helper.createCustomer(event['data']['object']))
-    # elif event['type'] == 'customer.updated':
-    #     print("Customer Updated")
-    #     print(Helper.updateCustomer(event['data']['object']))
-    # elif event['type'] == 'customer.deleted':
-    #     print("Customer Deleted")
-    # else:
-    #     print('Unhandled event type:', event['type'])
+    # Handle the event
+    if event['type'] == 'customer.created':
+        print("New Customer Created")
+        data = helper.getDataOnCreateOrUpdate(event['data']['object'])
+        producer.writeToTopic("create", data)
+
+    elif event['type'] == 'customer.updated':
+        print("Customer Updated")
+        data = helper.getDataOnCreateOrUpdate(event['data']['object'])
+        producer.writeToTopic("update", data)
+
+    elif event['type'] == 'customer.deleted':
+        print("Customer Deleted")
+        data = helper.getDataOnDelete(event['data']['object'])
+        producer.writeToTopic("delete", data)
+
+    else:
+        print('Unhandled event type:', event['type'])
 
     return jsonify(success=True)
 
