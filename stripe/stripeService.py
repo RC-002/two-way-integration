@@ -1,5 +1,6 @@
 import stripe
 from db.model import Customer
+import configparser
 
 class Helper():        
     def getStripeID(stripeCustomer):
@@ -8,7 +9,12 @@ class Helper():
 
 
 class stripeService:
-    stripe.api_key = "<>"
+
+    def __init__(self):
+        # read config file
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        stripe.api_key = config.get('Keys', 'api_key')
 
     # Create a customer
     def createCustomer(self, email, name):

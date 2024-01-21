@@ -15,6 +15,7 @@ class syncProducer():
             "method": method,
             "Customer": customer        
         }
+        print(data)
         try:
             self.producer.send(self.topic, data)
         except:

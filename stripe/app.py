@@ -5,9 +5,14 @@ from stripeService import stripeService
 from KafkaConsumer import syncConsumer
 from KafkaProducer import syncProducer
 from Helper import Helper
+import configparser
+
+# read config file
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = "<>"
+endpoint_secret = config.get('Keys', 'endpoint_secret')
 
 app = Flask(__name__)
 service = stripeService()

@@ -18,28 +18,21 @@ class syncConsumer:
     def sync(self):
         while True:
             data = next(self.consumer)
+            customer = data.value["Customer"]
+            id = customer["ID"]
+            name = customer["name"]
+            email = customer["email"]
 
             if(data.value["method"] == "create"):
-                customer = data.value["Customer"]
-                name = customer["name"]
-                email = customer["email"]
                 stripeCustomer = stripeService().createCustomer(email, name)
                 print(stripeCustomer)
             
             elif(data.value["method"] == "update"):
-                print("Here")
-                customer = data.value["Customer"]
-                name = customer["name"]
-                email = customer["email"]
-                
-                stripeCustomer = stripeService().updateCustomer(email, name)
+                stripeCustomer = stripeService().updateCustomer(id, email, name)
                 print(stripeCustomer)
             
             elif(data.value["method"] == "delete"):
-                customer = data.value["Customer"]
-                stripe_id = customer["ID"]
-                
-                stripeCustomer = stripeService().deleteCustomer(stripe_id)
+                stripeCustomer = stripeService().deleteCustomer(id)
 
 if __name__ == "__main__":
     syncConsumer().sync()

@@ -83,7 +83,7 @@ async def update_customer(customer_id: str, new_name: str, new_email: str, servi
 async def delete_customer(customer_id: str, service: dbService = Depends(get_service)):
     integrationID = dbService().findStripeID(customer_id)
     customer = service.deleteCustomer(customer_id)
-    if customer:
+    if customer is not None:
         syncProducer.writeToTopic("delete", ID = integrationID, name = None, email = None)
         return {"detail" :"Customer deleted"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
