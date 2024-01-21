@@ -134,12 +134,11 @@ class stripeService:
     # Created a customer in Stripe, now create a customer locally
     def createCustomerLocally(self, stripe_id, email, name):
         try:
-            localCustomer = dbService().createCustomer(name, email)
-            if localCustomer is not None:
-                dbService().addCustomerMapping(email, stripe_id)
-                print("THis is done as well")
-                return localCustomer
-            return None            
+            localCustomer = dbService().findCustomerID(stripe_id)
+            if localCustomer is None:
+                localCustomer = dbService().createCustomer(name, email)            
+            dbService().addCustomerMapping(email, stripe_id)
+            return localCustomer
         except:
             return None
 
@@ -154,8 +153,9 @@ class stripeService:
     # Update customer locally, then update customer in Stripe
     def updateCustomer(self, customer_id, new_email=None, new_name=None):
         try:
+            stripe_id = dbService().findStripeID(customer_id)
             stripe.Customer.modify(
-                customer_id,
+                stripe_id,
                 email=new_email,
                 name=new_name,
             )
@@ -164,7 +164,7 @@ class stripeService:
             return None
 
     # Update customer in Stripe, then update customer locally
-    def updateCustomerLocally(self, stripe_id, new_email=None, new_name=None):
+    def updateCustomerLocally(self, stripe_id, new_name=None, new_email=None):
         try:
             localID = dbService().findCustomerID(stripe_id)
             if localID is not None:

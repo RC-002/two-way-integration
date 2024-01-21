@@ -1,6 +1,6 @@
 import json
-from kafka import KafkaConsumer, KafkaProducer
-
+from kafka import KafkaConsumer
+from customers.service import stripeService
 
 class syncConsumer:
     kafka_server = ["localhost"]
@@ -17,6 +17,11 @@ class syncConsumer:
 
     def sync(self):
         while True:
-            print("\n....................\n")
             data = next(self.consumer)
-            print(data)
+
+            if(data.value["method"] == "create"):
+                customer = data.value["Customer"]
+                name = customer["name"]
+                email = customer["email"]
+                
+                stripeCustomer = stripeService().createCustomer(email, name)

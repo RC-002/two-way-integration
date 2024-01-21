@@ -4,10 +4,10 @@ from flask import Flask, jsonify, request
 from customers.service import stripeService
 from KafkaConsumer import syncConsumer
 
-stripe.api_key = "<>"
+stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpoint_secret = "<>"
+endpoint_secret = 'whsec_yniVCAQpNBhEmW6gJTwpeAMT84KECbzl'
 
 app = Flask(__name__)
 service = stripeService()
@@ -56,7 +56,6 @@ def webhook():
         print(Helper.updateCustomer(event['data']['object']))
     elif event['type'] == 'customer.deleted':
         print("Customer Deleted")
-        print(Helper.deleteCustomer(event['data']['object']))
     else:
         print('Unhandled event type:', event['type'])
 
