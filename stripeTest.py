@@ -1,10 +1,9 @@
 import random
 import string
 
-from customers.service import stripeService, dbService
+from stripeService import stripeService
 
 service = stripeService()
-dbService = dbService()
 
 def generateRandomName():
     name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
@@ -21,8 +20,6 @@ def generateRandomEmail():
 email_to_create = generateRandomEmail()
 customer_name = generateRandomName()
 
-# Create a new customer in DB
-customer_id = dbService.createCustomer(name=customer_name, email=email_to_create).ID
 
 # Create a new customer
 new_customer = service.createCustomer(email_to_create, customer_name)
@@ -42,10 +39,6 @@ if new_customer is not None:
         if updated_customer is not None:
             deleted_customer = service.deleteCustomer(updated_customer.ID)        
             print("Deleted customer")
-
-            # Delete the customer from DB
-            if deleted_customer is not False:
-                dbService.deleteCustomer(customer_id)
             exit(0)
 
 print("Something went wrong :)")

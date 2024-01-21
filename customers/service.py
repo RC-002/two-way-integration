@@ -1,6 +1,5 @@
 from customers.model import Customer, ID_Mapping
 from customers.repository import dbConnectivity
-import stripe
 import uuid
 
 class Helper():    
@@ -8,10 +7,6 @@ class Helper():
         random_uuid = uuid.uuid4()
         hex_uuid = format(random_uuid.int, 'x')[:size]
         return str(hex_uuid)
-    
-    def getStripeID(stripeCustomer):
-        id = str(stripeCustomer.get("id"))
-        return id
 
 class dbService():
     def __init__(self):
@@ -109,91 +104,45 @@ class dbService():
         except:
             self.session.rollback()
             return False
-
-    def closeConnection(self):
-        self.session.close()
-        self.engine.dispose()
-
-
-class stripeService:
-    stripe.api_key = "<>"
-
-    # Created a customer locally, now create a customer in Stripe
-    def createCustomer(self, email, name):
+    
+    def deleteIDMappingFromIntegrationID(self, integrationID):
         try:
-            customer = stripe.Customer.create(
-                email=email,
-                name=name,
-            )
-            stripeId = Helper.getStripeID(customer)
-            dbService().addCustomerMapping(email, stripeId)
-            return Customer(ID=customer.id, name=customer.name, email=customer.email)
-        except:
-            return None
-
-    # Created a customer in Stripe, now create a customer locally
-    def createCustomerLocally(self, stripe_id, email, name):
-        try:
-            localCustomer = dbService().findCustomerID(stripe_id)
-            if localCustomer is None:
-                localCustomer = dbService().createCustomer(name, email)            
-            dbService().addCustomerMapping(email, stripe_id)
-            return localCustomer
-        except:
-            return None
-
-    # Get all customers from Stripe
-    def getCustomer(self, customer_id):
-        try:
-            customer = stripe.Customer.retrieve(customer_id)
-            return Customer(ID=customer.id, name=customer.name, email=customer.email)
-        except stripe.error.StripeError as e:
-            return None
-        
-    # Update customer locally, then update customer in Stripe
-    def updateCustomer(self, customer_id, new_email=None, new_name=None):
-        try:
-            stripe_id = dbService().findStripeID(customer_id)
-            stripe.Customer.modify(
-                stripe_id,
-                email=new_email,
-                name=new_name,
-            )
-            return Customer(ID=customer_id, name=new_name, email=new_email)        
-        except:
-            return None
-
-    # Update customer in Stripe, then update customer locally
-    def updateCustomerLocally(self, stripe_id, new_name=None, new_email=None):
-        try:
-            localID = dbService().findCustomerID(stripe_id)
-            if localID is not None:
-                localCustomer = dbService().updateCustomer(localID, new_name, new_email)
-                if localCustomer is not None:
-                    return localCustomer 
-            return None   
-        except:
-            return None
-
-    # Delete customer locally, then delete customer in Stripe 
-    def deleteCustomer(self, stripe_id):
-        try:
-            customer_id = dbService().findCustomerID(stripe_id)
-            stripe.Customer.delete(stripe_id)
-            if(dbService().deleteIDMapping(customer_id)):
+            mapping = self.session.query(ID_Mapping).filter(ID_Mapping.stripe_id == integrationID).first()
+            if mapping:
+                self.session.delete(mapping)
+                self.session.commit()                
                 return True
             return False
         except:
+            self.session.rollback()
             return False
     
-    # Delete customer in Stripe, then delete customer locally
-    def deleteCustomerLocally(self, stripe_id):
-        try:
-            customer_id = dbService().findCustomerID(stripe_id)
-            if customer_id is not None:
-                if dbService().deleteIDMapping(customer_id):
-                    if dbService().deleteCustomer(customer_id):
-                        return True
-            return False
-        except:
-            return False
+    # Kafka Event Methods
+    def createCustomerFromEvent(self, name, email, integrationID):
+        customerId = self.findCustomerID(integrationID)
+        if customerId is not None:
+            return self.getCustomer(integrationID)
+        
+        customer = self.createCustomer(name, email)
+        if customer is not None:
+            self.addCustomerMapping(email, integrationID)
+            return customer
+        return None
+
+    def updateCustomerFromEvent(self, integrationID, new_name=None, new_email=None):
+        customerId = self.findCustomerID(integrationID)
+        if customerId is not None:
+            return self.updateCustomer(customerId, new_name, new_email)
+        return None
+    
+    def deleteCustomerFromEvent(self, integrationID):
+        if self.deleteIDMappingFromIntegrationID(integrationID):      
+            customerId = self.findCustomerID(integrationID)
+            if customerId is not None:
+                return self.deleteCustomer(customerId)
+        return False
+
+    # Close connection
+    def closeConnection(self):
+        self.session.close()
+        self.engine.dispose()
