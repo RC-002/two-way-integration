@@ -1,6 +1,6 @@
 import json
 from kafka import KafkaConsumer
-from customers.service import stripeService
+from stripeService import stripeService
 
 class syncConsumer:
     kafka_server = ["localhost"]
@@ -23,5 +23,19 @@ class syncConsumer:
                 customer = data.value["Customer"]
                 name = customer["name"]
                 email = customer["email"]
+                stripeService().createCustomer(email, name)
+            
+            elif(data.value["method"] == "update"):
+                print("Here")
+                customer = data.value["Customer"]
+                name = customer["name"]
+                email = customer["email"]
                 
-                stripeCustomer = stripeService().createCustomer(email, name)
+                stripeCustomer = stripeService().updateCustomer(email, name)
+                print(stripeCustomer)
+            
+            elif(data.value["method"] == "delete"):
+                customer = data.value["Customer"]
+                stripe_id = customer["ID"]
+                
+                stripeCustomer = stripeService().deleteCustomer(stripe_id)

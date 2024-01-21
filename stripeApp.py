@@ -1,7 +1,7 @@
 import stripe
 from threading import Thread
 from flask import Flask, jsonify, request
-from customers.service import stripeService
+from stripeService import stripeService
 from KafkaConsumer import syncConsumer
 
 stripe.api_key = 'sk_test_51OaYX4SJjgpVMnDMdKLpH5QXIdF0GHPQa0XrfTydE9DxU5kVQSxrpaGPPnT5gqfQuZAWi82m2TsGQ1h2PQ5XJW6e00G2bEX1X6'
@@ -19,17 +19,17 @@ class Helper:
         name = customer['name']
         email = customer['email']
         stripe_id = customer['id']      
-        return service.updateCustomerLocally(stripe_id, name, email)
+        return service.updateCustomer(stripe_id, name, email)
     
     def createCustomer(customer):
         name = customer['name']
         email = customer['email']
         stripe_id = customer['id']  
-        return service.createCustomerLocally(stripe_id, name, email)
+        return service.createCustomer(stripe_id, name, email)
     
     def deleteCustomer(customer):
         stripe_id = customer['id']
-        return service.deleteCustomerLocally(stripe_id)
+        return service.deleteCustomer(stripe_id)
     
         
 @app.route('/webhook', methods=['POST'])
@@ -46,18 +46,19 @@ def webhook():
         return jsonify(success=False), 500
     except stripe.error.SignatureVerificationError as e:
         return jsonify(success=False), 500
-
-    # Handle the event
-    if event['type'] == 'customer.created':
-        print("New Customer Created")
-        print(Helper.createCustomer(event['data']['object']))
-    elif event['type'] == 'customer.updated':
-        print("Customer Updated")
-        print(Helper.updateCustomer(event['data']['object']))
-    elif event['type'] == 'customer.deleted':
-        print("Customer Deleted")
-    else:
-        print('Unhandled event type:', event['type'])
+    
+    print(event)
+    # # Handle the event
+    # if event['type'] == 'customer.created':
+    #     print("New Customer Created")
+    #     print(Helper.createCustomer(event['data']['object']))
+    # elif event['type'] == 'customer.updated':
+    #     print("Customer Updated")
+    #     print(Helper.updateCustomer(event['data']['object']))
+    # elif event['type'] == 'customer.deleted':
+    #     print("Customer Deleted")
+    # else:
+    #     print('Unhandled event type:', event['type'])
 
     return jsonify(success=True)
 

@@ -10,7 +10,7 @@ class Helper():
 class stripeService:
     stripe.api_key = "<>"
 
-    # Created a customer locally, now create a customer in Stripe
+    # Create a customer
     def createCustomer(self, email, name):
         try:
             customer = stripe.Customer.create(
@@ -20,7 +20,8 @@ class stripeService:
             return Customer(ID=Helper.getStripeID(customer), name=customer.name, email=customer.email)
         except:
             return None
-    # Get all customers from Stripe
+        
+    # Get customer
     def getCustomer(self, customer_id):
         try:
             customer = stripe.Customer.retrieve(customer_id)
@@ -28,7 +29,7 @@ class stripeService:
         except stripe.error.StripeError as e:
             return None
         
-
+    # Update customer
     def updateCustomer(self, stripe_id, new_email=None, new_name=None):
         try:
             stripe.Customer.modify(
@@ -40,7 +41,7 @@ class stripeService:
         except:
             return None
 
-    # Delete customer locally, then delete customer in Stripe 
+    # Delete customer
     def deleteCustomer(self, stripe_id):
         try:
             stripe.Customer.delete(stripe_id)
