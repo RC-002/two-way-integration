@@ -19,4 +19,4 @@ python server.py
 cd ../stripe
 python app.py
 sleep 5
-PID=$(pgrep -f "python stripeApp.py")
+PID=$(pgrep -f "python app.py")
