@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from db.service import dbService
 from pydantic import BaseModel
 from KafkaProducer import syncProducer
+from KafkaConsumer import syncConsumer
 import re
+from contextlib import asynccontextmanager
 
 
 class Customer(BaseModel):
@@ -17,8 +19,14 @@ class Helper():
         return bool(match)
     
 
+# # Start Kafka listener in the background when the FastAPI app starts
+# async def lifespan(FastAPI):
+#     print("Horray!")
+#     syncConsumer()
+
 # App settings
 app = FastAPI()
+
 service = dbService()
 syncProducer = syncProducer()
 
@@ -80,6 +88,3 @@ async def delete_customer(customer_id: str, service: dbService = Depends(get_ser
         syncProducer.writeToTopic("delete", ID = integrationID, name = None, email = None)
         return {"detail" :"Customer deleted"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
-
-
-

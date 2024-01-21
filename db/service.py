@@ -118,7 +118,7 @@ class dbService():
             return False
     
     # Kafka Event Methods
-    def createCustomerFromEvent(self, name, email, integrationID):
+    def createCustomerFromEvent(self, integrationID, name, email):
         customerId = self.findCustomerID(integrationID)
         if customerId is not None:
             return self.getCustomer(integrationID)
@@ -135,11 +135,10 @@ class dbService():
             return self.updateCustomer(customerId, new_name, new_email)
         return None
     
-    def deleteCustomerFromEvent(self, integrationID):
-        if self.deleteIDMappingFromIntegrationID(integrationID):      
-            customerId = self.findCustomerID(integrationID)
-            if customerId is not None:
-                return self.deleteCustomer(customerId)
+    def deleteCustomerFromEvent(self, integrationID):    
+        customerId = self.findCustomerID(integrationID)
+        if self.deleteIDMappingFromIntegrationID(integrationID): 
+            return self.deleteCustomer(customerId)
         return False
 
     # Close connection
