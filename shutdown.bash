@@ -3,11 +3,11 @@
 # Stop servers
 
 # fast api server
-kill $(ps aux | grep '[u]vicorn localCustomersApp:app' | awk '{print $2}')
+kill $(ps aux | grep '[u]vicorn server:app' | awk '{print $2}')
 
 
 # flask server
-PID=$(pgrep -f "python stripeApp.py")
+PID=$(pgrep -f "python app.py")
 
 if [ -z "$PID" ]; then
   # Flask server is not running

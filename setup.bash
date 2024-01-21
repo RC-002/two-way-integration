@@ -16,7 +16,7 @@ cd source
 uvicorn server:app --port 8000 --reload
 
 # flask server
-cd ..
-python stripeApp.py
+cd ../stripe
+python app.py
 sleep 5
 PID=$(pgrep -f "python stripeApp.py")
