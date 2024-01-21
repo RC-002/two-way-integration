@@ -23,17 +23,17 @@ customer_name = generateRandomName()
 
 # Create a new customer
 new_customer = service.createCustomer(email_to_create, customer_name)
-print("New customer created")
+print("New customer created: " + str(new_customer))
 
 # Retrieve the created customer
 if new_customer is not None:
     retrieved_customer = service.getCustomer(new_customer.ID)
-    print("New customer retrieved")
+    print("New customer retrieved: " + str(retrieved_customer))
 
     # Update the retrieved customer
     if retrieved_customer is not None:
         updated_customer = service.updateCustomer(retrieved_customer.ID, new_email=generateRandomEmail(), new_name=generateRandomName())
-        print("Customer updated")
+        print("Customer updated: " + str(updated_customer))
 
         # Delete the updated customer
         if updated_customer is not None:

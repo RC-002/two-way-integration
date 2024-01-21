@@ -1,5 +1,8 @@
 # !/bin/bash
 
+# Set python path
+export PYTHONPATH=./:$PYTHONPATH
+
 # Start postgres and kafka containers
 docker compose up -d
 
