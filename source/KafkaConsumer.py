@@ -18,6 +18,7 @@ class syncConsumer:
     def sync(self):
         while True:
             data = next(self.consumer)
+            print(data.value)
 
             # Get customer data from event
             customer = data.value["Customer"]

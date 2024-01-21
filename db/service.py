@@ -120,9 +120,12 @@ class dbService():
     # Kafka Event Methods
     def createCustomerFromEvent(self, integrationID, name, email):
         customer = self.session.query(Customer).filter(Customer.email == email).first()
+        print(customer)
         if customer is None:        
             customer = self.createCustomer(name, email)
+            print("Customer created:", customer)
         mapping = self.addCustomerMapping(email, integrationID)
+        print("Mapping created:", mapping)
         return customer
 
     def updateCustomerFromEvent(self, integrationID, new_name=None, new_email=None):
