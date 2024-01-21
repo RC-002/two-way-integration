@@ -19,6 +19,11 @@ class Helper():
         email_pattern = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
         match = email_pattern.match(email)
         return bool(match)
+
+    def isValidName(name):
+        name_pattern = re.compile(r'[A-Za-z]{2,25}( [A-Za-z]{2,25})?')
+        match = name_pattern.match(name)
+        return bool(match)
     
 # App settings
 app = FastAPI()
@@ -43,6 +48,8 @@ async def get_producer():
 async def create_customer(name: str, email: str, service: dbService = Depends(get_service)):
     if not Helper.isValidEmail(email):
         raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email address")
+    if not Helper.isValidName(name):
+        raise HTTPException(status_code = status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid name")
     
     customer = service.createCustomer(name, email)
     if customer is not None:
