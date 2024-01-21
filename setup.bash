@@ -1,7 +1,7 @@
 # !/bin/bash
 
 # Set python path
-export PYTHONPATH=./:$PYTHONPATH
+export PYTHONPATH=$(pwd):$PYTHONPATH
 
 # Start postgres and kafka containers
 docker compose up -d
@@ -12,9 +12,11 @@ sleep 10
 # Start servers
 
 # fast api server
-uvicorn localCustomersApp:app --port 8000 --reload
+cd source
+uvicorn server:app --port 8000 --reload
 
 # flask server
+cd ..
 python stripeApp.py
 sleep 5
 PID=$(pgrep -f "python stripeApp.py")
