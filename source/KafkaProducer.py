@@ -7,7 +7,7 @@ from kafka import KafkaProducer
 
 class syncProducer():
     kafka_server = ["localhost"]
-    topic = "tests"
+    topic = "stripe_outgoing"
     producer = KafkaProducer(
         bootstrap_servers=kafka_server,
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),

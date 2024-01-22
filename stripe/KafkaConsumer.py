@@ -5,7 +5,7 @@ from stripeService import stripeService
 class syncConsumer:
     kafka_server = ["localhost"]
 
-    topic = "tests"
+    topic = "stripe_outgoing"
 
     consumer = KafkaConsumer(
         bootstrap_servers=kafka_server,
