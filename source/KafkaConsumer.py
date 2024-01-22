@@ -5,7 +5,7 @@ from db.service import dbService
 class syncConsumer:
     kafka_server = ["localhost"]
 
-    topic = "stripe_outgoing"
+    topic = "stripe_incoming"
 
     consumer = KafkaConsumer(
         bootstrap_servers=kafka_server,
